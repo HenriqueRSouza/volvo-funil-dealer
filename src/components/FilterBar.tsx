@@ -72,18 +72,32 @@ export default function FilterBar({ dealers, filters, onFiltersChange, originalP
 
   return (
     <div className="bg-card border border-border rounded-lg p-4 mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Filter className="h-4 w-4 text-muted-foreground" />
-        <h3 className="text-sm font-medium text-foreground">Filtros</h3>
+      <div className="flex items-center justify-between gap-2 mb-4">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-muted-foreground" />
+          <h3 className="text-sm font-medium text-foreground">Filtros</h3>
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllFilters}
+              className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Limpar filtros
+            </Button>
+          )}
+        </div>
+        
         {hasActiveFilters && (
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={clearAllFilters}
-            className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+            className="h-8 px-3 text-xs border-destructive/20 text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
             <X className="h-3 w-3 mr-1" />
-            Limpar filtros
+            Limpar Filtros
           </Button>
         )}
       </div>
