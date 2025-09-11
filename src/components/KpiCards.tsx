@@ -61,9 +61,9 @@ export default function KpiCards({ data, originalData, hasFiltersApplied = false
             <div key={index} className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow h-full relative">
               {/* Referência Total no canto superior direito */}
               {hasFiltersApplied && originalData && (
-                <div className="absolute top-3 right-3 text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded text-center min-w-[50px] z-10">
+                <div className="absolute top-3 right-3 text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded text-center min-w-[64px] z-10">
                   <div className="font-medium">BR</div>
-                  <div className="font-mono">
+                  <div className="font-mono whitespace-nowrap">
                     {index === 0 && formatBrazilianNumber(originalData.avgLeadToFaturamento)}
                     {index === 1 && formatBrazilianNumber(originalData.avgTestDriveToFaturamento)}
                     {index === 2 && formatBrazilianNumber(originalData.avgTotalJourney)}
@@ -74,7 +74,7 @@ export default function KpiCards({ data, originalData, hasFiltersApplied = false
               
               <div className={cn(
                 "flex items-start gap-3 mb-4",
-                hasFiltersApplied && originalData && "pr-20"
+                hasFiltersApplied && originalData && "pr-24"
               )}>
                 <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
                   <Icon className="w-5 h-5 text-primary" />
@@ -86,11 +86,11 @@ export default function KpiCards({ data, originalData, hasFiltersApplied = false
               
               <div className="space-y-4">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-primary mb-2">
+                  <div className="text-3xl font-bold text-primary leading-none h-10 flex items-center justify-center">
                     {metric.value}
                   </div>
                 </div>
-                <div className="text-xs text-muted-foreground text-center leading-relaxed px-2">
+                <div className="text-xs text-muted-foreground text-center leading-relaxed px-2 min-h-[40px] flex items-center justify-center">
                   {metric.subtitle}
                 </div>
               </div>
