@@ -143,7 +143,8 @@ function calculateFilteredMetrics(
   filteredSheet1: any[], 
   filteredSheet2: any[], 
   filteredSheet3: any[], 
-  filteredSheet4: any[]
+  filteredSheet4: any[],
+  filters: FilterOptions
 ): Omit<ProcessedData, 'period' | 'rawData' | 'dealers'> {
   // Contadores básicos
   const totalLeads = filteredSheet1.length;
@@ -186,6 +187,9 @@ function calculateFilteredMetrics(
   // Total de faturados
   const totalFaturados = totalFaturamentos > 0 ? totalFaturamentos : leadsFaturados + testDrivesFaturados;
 
+  // Vendas do funil Test Drive -> Faturados
+  const vendasTD = (filters.selectedDealers.length > 0) ? totalFaturamentos : testDrivesFaturados;
+
   // Métricas dos funis
   const funnelMetrics: FunnelMetrics = {
     leadsDiretos: {
@@ -198,7 +202,7 @@ function calculateFilteredMetrics(
     },
     testDrivesVendidos: {
       testDrives: totalTestDrives,
-      vendas: totalFaturamentos
+      vendas: vendasTD
     },
     jornadaCompleta: {
       leads: totalLeads,
@@ -304,7 +308,7 @@ export function applyFilters(originalData: ProcessedData, filters: FilterOptions
   const filteredSheet4 = filterSheetData(originalData.rawData.sheet4Data, filters, undefined, 'Sheet4');
 
   // Recalcular métricas
-  const newMetrics = calculateFilteredMetrics(filteredSheet1, filteredSheet2, filteredSheet3, filteredSheet4);
+  const newMetrics = calculateFilteredMetrics(filteredSheet1, filteredSheet2, filteredSheet3, filteredSheet4, filters);
 
   // Calcular novo período baseado nos dados filtrados
   const allFilteredDates: Date[] = [];

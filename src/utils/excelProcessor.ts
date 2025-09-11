@@ -350,8 +350,8 @@ function calculateMetrics(sheet1Data: any[], sheet2Data: any[], sheet3Data: any[
       testDrives: leadsWithTestDrive
     },
     testDrivesVendidos: {
-      testDrives: totalTestDrives, // Corrigido: usar total da sheet2
-      vendas: totalFaturados
+      testDrives: totalTestDrives, // usar total da sheet2
+      vendas: testDrivesFaturados
     },
     jornadaCompleta: {
       leads: totalLeads,
