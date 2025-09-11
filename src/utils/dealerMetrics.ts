@@ -70,6 +70,7 @@ export function calculateDealerComparison(
     dateRange: filters.dateRange,
     selectedDealers: [] // Não aplicar filtro de dealer para manter todos
   });
+  const useSheet4 = filteredData.rawData.sheet4Data.length > 0;
   
   // Mapear dados por dealer
   const dealerDataMap = new Map<string, {
@@ -103,9 +104,9 @@ export function calculateDealerComparison(
         dealerData.leadsWithTestDrive++;
       }
       
-      // Verificar se lead foi faturado
+      // Verificar se lead foi faturado (somar somente se não houver Sheet4)
       const flagFaturado = getValue(row, ['Flag_Faturado']);
-      if (flagFaturado === 1 || flagFaturado === '1') {
+      if (!useSheet4 && (flagFaturado === 1 || flagFaturado === '1')) {
         dealerData.sales++;
       }
     }
@@ -154,6 +155,12 @@ export function calculateDealerComparison(
       dealerData.sales++;
     }
   });
+  
+  if (!useSheet4) {
+    dealerDataMap.forEach((data) => {
+      data.sales += data.testDrivesFaturados;
+    });
+  }
   
   // Converter para array de métricas por dealer
   const dealerMetrics: DealerMetrics[] = Array.from(dealerDataMap.entries()).map(([dealerName, data]) => {
