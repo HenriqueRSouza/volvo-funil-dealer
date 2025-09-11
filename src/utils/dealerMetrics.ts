@@ -66,10 +66,29 @@ export function calculateDealerComparison(
   filters: FilterOptions
 ): DealerComparisonData {
   // Usar a mesma função de filtro que applyFilters usa para garantir consistência
+  console.groupCollapsed('🧮 DealerComparison');
+  console.log('Filtros recebidos (apenas período):', {
+    start: filters.dateRange.start,
+    end: filters.dateRange.end
+  });
+  console.log('Linhas originais por sheet:', {
+    sheet1: originalData.rawData.sheet1Data.length,
+    sheet2: originalData.rawData.sheet2Data.length,
+    sheet3: originalData.rawData.sheet3Data.length,
+    sheet4: originalData.rawData.sheet4Data.length
+  });
   const filteredData = applyFilters(originalData, {
     dateRange: filters.dateRange,
     selectedDealers: [] // Não aplicar filtro de dealer para manter todos
   });
+  console.log('Linhas após filtro de período:', {
+    period: filteredData.period,
+    sheet1: filteredData.rawData.sheet1Data.length,
+    sheet2: filteredData.rawData.sheet2Data.length,
+    sheet3: filteredData.rawData.sheet3Data.length,
+    sheet4: filteredData.rawData.sheet4Data.length
+  });
+  console.groupEnd();
   const useSheet4 = filteredData.rawData.sheet4Data.length > 0;
   
   // Mapear dados por dealer

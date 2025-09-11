@@ -49,7 +49,19 @@ export default function Index() {
   // Calcular dados de comparação de dealers (apenas quando não há filtros de dealer)
   const dealerComparison = useMemo(() => {
     if (!originalData || filters.selectedDealers.length > 0) return null;
-    return calculateDealerComparison(originalData, filters);
+    const result = calculateDealerComparison(originalData, filters);
+    console.info('🔁 dealerComparison recalculado', {
+      start: filters.dateRange.start,
+      end: filters.dateRange.end,
+      br: {
+        leads: result.brMetrics.leads,
+        testDrives: result.brMetrics.testDrives,
+        sales: result.brMetrics.sales,
+        leadToTD: result.brMetrics.leadsToTestDriveRate,
+        tdToSales: result.brMetrics.testDriveToSalesRate
+      }
+    });
+    return result;
   }, [originalData, filters]);
 
   const handleFileUpload = async (file: File) => {
