@@ -61,7 +61,7 @@ export default function KpiCards({ data, originalData, hasFiltersApplied = false
               {/* Referência Total no canto superior direito */}
               {hasFiltersApplied && originalData && (
                 <div className="absolute top-2 right-2 text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded text-center min-w-[60px]">
-                  <div className="font-medium">Total BR</div>
+                  <div className="font-medium">BR</div>
                   <div className="font-mono">
                     {index === 0 && formatBrazilianNumber(originalData.avgLeadToFaturamento)}
                     {index === 1 && formatBrazilianNumber(originalData.avgTestDriveToFaturamento)}

@@ -3,9 +3,11 @@ import { FunnelMetrics } from '@/utils/excelProcessor';
 
 interface MultipleFunnelsProps {
   data: FunnelMetrics;
+  originalData?: FunnelMetrics; // Para mostrar referência total
+  hasFiltersApplied?: boolean;
 }
 
-export default function MultipleFunnels({ data }: MultipleFunnelsProps) {
+export default function MultipleFunnels({ data, originalData, hasFiltersApplied = false }: MultipleFunnelsProps) {
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat('pt-BR').format(value);
   };
@@ -68,10 +70,23 @@ export default function MultipleFunnels({ data }: MultipleFunnelsProps) {
         {conversionCards.map((card, index) => {
           const Icon = card.icon;
           return (
-            <div key={index} className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow">
+            <div key={index} className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow relative">
+              {/* Referência Total no canto superior direito */}
+              {hasFiltersApplied && originalData && (
+                <div className="absolute top-2 right-2 text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded text-center min-w-[60px]">
+                  <div className="font-medium">BR</div>
+                  <div className="font-mono">
+                    {index === 0 && calculateConversion(originalData.leadsDiretos.leads, originalData.leadsDiretos.faturados)}
+                    {index === 1 && calculateConversion(originalData.jornadaCompleta.leads, originalData.jornadaCompleta.faturados)}
+                    {index === 2 && calculateConversion(originalData.leadsComTestDrive.leads, originalData.leadsComTestDrive.testDrives)}
+                    {index === 3 && calculateConversion(originalData.testDrivesVendidos.testDrives, originalData.testDrivesVendidos.vendas)}
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-5 h-5 text-primary" />
-                <h3 className="font-semibold text-foreground">{card.title}</h3>
+                <h3 className="font-semibold text-foreground pr-16">{card.title}</h3>
               </div>
               <div className="text-xs text-muted-foreground mb-4 italic">
                 {card.description}

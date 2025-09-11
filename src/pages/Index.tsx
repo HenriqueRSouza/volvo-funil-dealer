@@ -125,12 +125,25 @@ export default function Index() {
             <>
               {/* General Funnel */}
               <section>
-                <GeneralFunnel data={{
-                  totalLeads: data.leads,
-                  totalStoreVisits: 0, // Não disponível nos dados atuais
-                  totalTestDrives: data.testDrives,
-                  totalSales: data.faturados
-                }} />
+                <GeneralFunnel 
+                  data={{
+                    totalLeads: data.leads,
+                    totalStoreVisits: 0, // Não disponível nos dados atuais
+                    totalTestDrives: data.testDrives,
+                    totalSales: data.faturados
+                  }}
+                  originalData={originalData ? {
+                    totalLeads: originalData.leads,
+                    totalStoreVisits: 0,
+                    totalTestDrives: originalData.testDrives,
+                    totalSales: originalData.faturados
+                  } : undefined}
+                  hasFiltersApplied={
+                    filters.selectedDealers.length > 0 || 
+                    filters.dateRange.start !== null || 
+                    filters.dateRange.end !== null
+                  }
+                />
               </section>
 
               {/* KPI Cards */}
@@ -172,7 +185,15 @@ export default function Index() {
 
               {/* Multiple Funnels */}
               <section>
-                <MultipleFunnels data={data.funnelMetrics} />
+                <MultipleFunnels 
+                  data={data.funnelMetrics}
+                  originalData={originalData?.funnelMetrics}
+                  hasFiltersApplied={
+                    filters.selectedDealers.length > 0 || 
+                    filters.dateRange.start !== null || 
+                    filters.dateRange.end !== null
+                  }
+                />
               </section>
             </>
           )}
