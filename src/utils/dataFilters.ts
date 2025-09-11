@@ -107,7 +107,20 @@ function filterSheetData(data: any[], filters: FilterOptions, sheet1Data?: any[]
 
     // Filtro de data
     if (filters.dateRange.start || filters.dateRange.end) {
-      const dateValue = getValue(rowToCheck, ['dateSales', 'DateSales', 'Data', 'data']);
+      let dateValue = getValue(rowToCheck, ['dateSales', 'DateSales', 'Data', 'data']);
+      
+      // Para Sheet2, a data pode estar na coluna E (índice 4)
+      if (!dateValue && sheetName === 'Sheet2') {
+        const keys = Object.keys(rowToCheck);
+        if (keys[4]) dateValue = rowToCheck[keys[4]]; // Coluna E
+      }
+      
+      // Para Sheet4, a data pode estar na coluna D (índice 3)  
+      if (!dateValue && sheetName === 'Sheet4') {
+        const keys = Object.keys(rowToCheck);
+        if (keys[3]) dateValue = rowToCheck[keys[3]]; // Coluna D
+      }
+      
       if (dateValue) {
         let date: Date | null = null;
         
@@ -127,7 +140,11 @@ function filterSheetData(data: any[], filters: FilterOptions, sheet1Data?: any[]
             console.log(`🚫 ${sheetName} - Linha rejeitada por data final: ${date} > ${filters.dateRange.end}`);
             return false;
           }
+        } else {
+          console.log(`⚠️ ${sheetName} - Data inválida encontrada: ${dateValue}`);
         }
+      } else {
+        console.log(`⚠️ ${sheetName} - Nenhuma data encontrada na linha`);
       }
     }
 
@@ -317,8 +334,21 @@ export function applyFilters(originalData: ProcessedData, filters: FilterOptions
   // Calcular novo período baseado nos dados filtrados
   const allFilteredDates: Date[] = [];
   
-  [...filteredSheet1, ...filteredSheet2, ...filteredSheet3, ...filteredSheet4].forEach(row => {
-    const dateValue = getValue(row, ['dateSales', 'DateSales', 'Data', 'data']);
+  [...filteredSheet1, ...filteredSheet2, ...filteredSheet3, ...filteredSheet4].forEach((row, index) => {
+    let dateValue = getValue(row, ['dateSales', 'DateSales', 'Data', 'data']);
+    
+    // Para Sheet2, procurar na coluna E
+    if (!dateValue && index >= filteredSheet1.length && index < filteredSheet1.length + filteredSheet2.length) {
+      const keys = Object.keys(row);
+      if (keys[4]) dateValue = row[keys[4]]; // Coluna E
+    }
+    
+    // Para Sheet4, procurar na coluna D  
+    if (!dateValue && index >= filteredSheet1.length + filteredSheet2.length + filteredSheet3.length) {
+      const keys = Object.keys(row);
+      if (keys[3]) dateValue = row[keys[3]]; // Coluna D
+    }
+    
     if (dateValue) {
       let date: Date | null = null;
       

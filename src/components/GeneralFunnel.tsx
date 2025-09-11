@@ -9,11 +9,9 @@ interface GeneralMetrics {
 
 interface GeneralFunnelProps {
   data: GeneralMetrics;
-  originalData?: GeneralMetrics; // Para mostrar referência total
-  hasFiltersApplied?: boolean;
 }
 
-export default function GeneralFunnel({ data, originalData, hasFiltersApplied = false }: GeneralFunnelProps) {
+export default function GeneralFunnel({ data }: GeneralFunnelProps) {
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat('pt-BR').format(value);
   };
@@ -35,25 +33,18 @@ export default function GeneralFunnel({ data, originalData, hasFiltersApplied = 
               clipPath: 'polygon(3% 0, 97% 0, 94% 100%, 6% 100%)'
             }}
           >
-              <div className="flex items-center justify-between w-full" style={{ padding: '0 12%' }}>
-                <div className="flex items-center">
-                  <Users className="w-5 h-5 mr-3" />
-                  <div>
-                    <span className="font-semibold text-base block">Total de Leads</span>
-                    <span className="text-xs opacity-80">Leads gerados no período</span>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold">
-                    {formatNumber(data.totalLeads)}
-                  </div>
-                  {hasFiltersApplied && originalData && (
-                    <div className="text-xs opacity-50">
-                      BR: {formatNumber(originalData.totalLeads)}
-                    </div>
-                  )}
+            <div className="flex items-center justify-between w-full" style={{ padding: '0 12%' }}>
+              <div className="flex items-center">
+                <Users className="w-5 h-5 mr-3" />
+                <div>
+                  <span className="font-semibold text-base block">Total de Leads</span>
+                  <span className="text-xs opacity-80">Leads gerados no período</span>
                 </div>
               </div>
+              <span className="text-2xl font-bold">
+                {formatNumber(data.totalLeads)}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -75,16 +66,9 @@ export default function GeneralFunnel({ data, originalData, hasFiltersApplied = 
                   <span className="text-xs opacity-80">Tráfego físico total</span>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold">
-                  {data.totalStoreVisits > 0 ? formatNumber(data.totalStoreVisits) : '--'}
-                </div>
-                {hasFiltersApplied && originalData && (
-                  <div className="text-xs opacity-50">
-                    BR: {originalData.totalStoreVisits > 0 ? formatNumber(originalData.totalStoreVisits) : '--'}
-                  </div>
-                )}
-              </div>
+              <span className="text-2xl font-bold">
+                {data.totalStoreVisits > 0 ? formatNumber(data.totalStoreVisits) : '--'}
+              </span>
             </div>
           </div>
         </div>
@@ -107,16 +91,9 @@ export default function GeneralFunnel({ data, originalData, hasFiltersApplied = 
                   <span className="text-xs opacity-80">Experiências realizadas</span>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold">
-                  {formatNumber(data.totalTestDrives)}
-                </div>
-                {hasFiltersApplied && originalData && (
-                  <div className="text-xs opacity-50">
-                    BR: {formatNumber(originalData.totalTestDrives)}
-                  </div>
-                )}
-              </div>
+              <span className="text-2xl font-bold">
+                {formatNumber(data.totalTestDrives)}
+              </span>
             </div>
           </div>
         </div>
@@ -139,16 +116,9 @@ export default function GeneralFunnel({ data, originalData, hasFiltersApplied = 
                   <span className="text-xs opacity-80">Veículos faturados</span>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold">
-                  {formatNumber(data.totalSales)}
-                </div>
-                {hasFiltersApplied && originalData && (
-                  <div className="text-xs opacity-50">
-                    BR: {formatNumber(originalData.totalSales)}
-                  </div>
-                )}
-              </div>
+              <span className="text-2xl font-bold">
+                {formatNumber(data.totalSales)}
+              </span>
             </div>
           </div>
         </div>
