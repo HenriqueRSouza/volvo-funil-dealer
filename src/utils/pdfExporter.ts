@@ -8,7 +8,7 @@ export const exportToPDF = async (elementId: string = 'dashboard-content') => {
     
     // Capturar screenshot do elemento
     const canvas = await html2canvas(element, {
-      scale: 2, // Melhor qualidade
+      scale: 1.2, // Escala reduzida para arquivo menor
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
@@ -17,8 +17,8 @@ export const exportToPDF = async (elementId: string = 'dashboard-content') => {
       width: element.scrollWidth
     });
 
-    // Configurar PDF
-    const imgData = canvas.toDataURL('image/png');
+    // Configurar PDF com compressão JPEG
+    const imgData = canvas.toDataURL('image/jpeg', 0.8); // JPEG com 80% de qualidade
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -37,7 +37,7 @@ export const exportToPDF = async (elementId: string = 'dashboard-content') => {
     const scaledHeight = imgHeight * ratio;
 
     // Adicionar imagem ao PDF
-    pdf.addImage(imgData, 'PNG', 0, 0, scaledWidth, scaledHeight);
+    pdf.addImage(imgData, 'JPEG', 0, 0, scaledWidth, scaledHeight);
 
     // Gerar nome do arquivo com data atual
     const now = new Date();
