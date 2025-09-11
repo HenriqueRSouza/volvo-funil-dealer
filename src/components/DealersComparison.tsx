@@ -8,7 +8,7 @@ interface DealersComparisonProps {
   data: DealerComparisonData;
 }
 
-type SortField = 'dealerName' | 'leads' | 'testDrives' | 'sales' | 'leadsToTestDriveRate' | 'testDriveToSalesRate' | 'totalConversionRate';
+type SortField = 'dealerName' | 'leads' | 'testDrives' | 'sales' | 'leadsToTestDriveRate' | 'testDriveToSalesRate';
 type SortDirection = 'asc' | 'desc';
 
 export default function DealersComparison({ data }: DealersComparisonProps) {
@@ -69,18 +69,35 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
     </Button>
   );
 
+  const AbsoluteValueCell = ({ 
+    dealerValue, 
+    totalBrValue 
+  }: {
+    dealerValue: number;
+    totalBrValue: number;
+  }) => {
+    const percentage = totalBrValue > 0 ? (dealerValue / totalBrValue) * 100 : 0;
+    
+    return (
+      <div className="flex flex-col items-end gap-1">
+        <span className="font-medium">{formatNumber(dealerValue)}</span>
+        <span className="text-xs text-muted-foreground">
+          {percentage.toFixed(1)}% do total BR
+        </span>
+      </div>
+    );
+  };
+
   const PerformanceCell = ({ 
     dealerValue, 
     brValue, 
-    isPercentage = true, 
-    formatter = formatNumber 
+    formatter = formatPercentage 
   }: {
     dealerValue: number;
     brValue: number;
-    isPercentage?: boolean;
     formatter?: (value: number) => string;
   }) => {
-    const indicator = getPerformanceIndicator(dealerValue, brValue, isPercentage);
+    const indicator = getPerformanceIndicator(dealerValue, brValue, true);
     const Icon = indicator.icon;
     
     return (
@@ -89,10 +106,7 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
         <div className={`flex items-center gap-1 px-2 py-1 rounded-full ${indicator.bgColor}`}>
           <Icon className={`w-3 h-3 ${indicator.color}`} />
           <span className={`text-xs font-medium ${indicator.color}`}>
-            {isPercentage ? 
-              (indicator.value > 0 ? '+' : '') + indicator.value.toFixed(1) + 'pp' :
-              (indicator.value > 0 ? '+' : '') + formatNumber(Math.round(indicator.value))
-            }
+            {(indicator.value > 0 ? '+' : '') + indicator.value.toFixed(1) + 'pp'}
           </span>
         </div>
       </div>
@@ -107,7 +121,7 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
             Comparativo por Concessionária
           </h2>
           <p className="text-muted-foreground text-sm">
-            Performance de cada dealer comparada à média nacional (BR)
+            Performance de cada dealer com participação no total BR e comparação nas taxas de conversão
           </p>
         </div>
         
@@ -133,20 +147,16 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
                 <th className="text-right py-3 px-2">
                   <SortButton field="testDriveToSalesRate">Taxa TD→Venda</SortButton>
                 </th>
-                <th className="text-right py-3 px-2">
-                  <SortButton field="totalConversionRate">Conversão Total</SortButton>
-                </th>
               </tr>
               
               {/* Linha de referência BR */}
               <tr className="bg-secondary/30 border-b border-border">
-                <td className="py-2 px-2 font-medium text-primary">Média BR</td>
+                <td className="py-2 px-2 font-medium text-primary">Total BR</td>
                 <td className="text-right py-2 px-2 text-sm font-medium">{formatNumber(data.brMetrics.leads)}</td>
                 <td className="text-right py-2 px-2 text-sm font-medium">{formatNumber(data.brMetrics.testDrives)}</td>
                 <td className="text-right py-2 px-2 text-sm font-medium">{formatNumber(data.brMetrics.sales)}</td>
                 <td className="text-right py-2 px-2 text-sm font-medium">{formatPercentage(data.brMetrics.leadsToTestDriveRate)}</td>
                 <td className="text-right py-2 px-2 text-sm font-medium">{formatPercentage(data.brMetrics.testDriveToSalesRate)}</td>
-                <td className="text-right py-2 px-2 text-sm font-medium">{formatPercentage(data.brMetrics.totalConversionRate)}</td>
               </tr>
             </thead>
             
@@ -155,45 +165,33 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
                 <tr key={dealer.dealerName} className="border-b border-border/50 hover:bg-accent/20">
                   <td className="py-3 px-2 font-medium">{dealer.dealerName}</td>
                   <td className="text-right py-3 px-2">
-                    <PerformanceCell 
+                    <AbsoluteValueCell 
                       dealerValue={dealer.leads} 
-                      brValue={data.brMetrics.leads} 
-                      isPercentage={false}
+                      totalBrValue={data.brMetrics.leads}
                     />
                   </td>
                   <td className="text-right py-3 px-2">
-                    <PerformanceCell 
+                    <AbsoluteValueCell 
                       dealerValue={dealer.testDrives} 
-                      brValue={data.brMetrics.testDrives} 
-                      isPercentage={false}
+                      totalBrValue={data.brMetrics.testDrives}
                     />
                   </td>
                   <td className="text-right py-3 px-2">
-                    <PerformanceCell 
+                    <AbsoluteValueCell 
                       dealerValue={dealer.sales} 
-                      brValue={data.brMetrics.sales} 
-                      isPercentage={false}
+                      totalBrValue={data.brMetrics.sales}
                     />
                   </td>
                   <td className="text-right py-3 px-2">
                     <PerformanceCell 
                       dealerValue={dealer.leadsToTestDriveRate} 
                       brValue={data.brMetrics.leadsToTestDriveRate}
-                      formatter={formatPercentage}
                     />
                   </td>
                   <td className="text-right py-3 px-2">
                     <PerformanceCell 
                       dealerValue={dealer.testDriveToSalesRate} 
                       brValue={data.brMetrics.testDriveToSalesRate}
-                      formatter={formatPercentage}
-                    />
-                  </td>
-                  <td className="text-right py-3 px-2">
-                    <PerformanceCell 
-                      dealerValue={dealer.totalConversionRate} 
-                      brValue={data.brMetrics.totalConversionRate}
-                      formatter={formatPercentage}
                     />
                   </td>
                 </tr>
