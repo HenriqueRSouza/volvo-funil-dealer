@@ -135,19 +135,39 @@ export default function Index() {
 
               {/* KPI Cards */}
               <section>
-                <KpiCards data={{
-                  avgLeadToTestDrive: data.avgLeadToTestDrive,
-                  avgTestDriveToFaturamento: data.avgTestDriveToFaturamento,
-                  avgTotalJourney: data.avgTotalJourney,
-                  avgLeadToFaturamento: data.avgLeadToFaturamento,
-                  leads: data.leads,
-                  testDrives: data.testDrives,
-                  faturados: data.faturados,
-                  decidedLeadsCount: data.decidedLeadsCount,
-                  decidedLeadsPercentage: data.decidedLeadsPercentage,
-                  leadsFaturadosCount: data.leadsFaturadosCount,
-                  funnelMetrics: data.funnelMetrics
-                }} />
+                <KpiCards 
+                  data={{
+                    avgLeadToTestDrive: data.avgLeadToTestDrive,
+                    avgTestDriveToFaturamento: data.avgTestDriveToFaturamento,
+                    avgTotalJourney: data.avgTotalJourney,
+                    avgLeadToFaturamento: data.avgLeadToFaturamento,
+                    leads: data.leads,
+                    testDrives: data.testDrives,
+                    faturados: data.faturados,
+                    decidedLeadsCount: data.decidedLeadsCount,
+                    decidedLeadsPercentage: data.decidedLeadsPercentage,
+                    leadsFaturadosCount: data.leadsFaturadosCount,
+                    funnelMetrics: data.funnelMetrics
+                  }}
+                  originalData={originalData ? {
+                    avgLeadToTestDrive: originalData.avgLeadToTestDrive,
+                    avgTestDriveToFaturamento: originalData.avgTestDriveToFaturamento,
+                    avgTotalJourney: originalData.avgTotalJourney,
+                    avgLeadToFaturamento: originalData.avgLeadToFaturamento,
+                    leads: originalData.leads,
+                    testDrives: originalData.testDrives,
+                    faturados: originalData.faturados,
+                    decidedLeadsCount: originalData.decidedLeadsCount,
+                    decidedLeadsPercentage: originalData.decidedLeadsPercentage,
+                    leadsFaturadosCount: originalData.leadsFaturadosCount,
+                    funnelMetrics: originalData.funnelMetrics
+                  } : undefined}
+                  hasFiltersApplied={
+                    filters.selectedDealers.length > 0 || 
+                    filters.dateRange.start !== null || 
+                    filters.dateRange.end !== null
+                  }
+                />
               </section>
 
               {/* Multiple Funnels */}

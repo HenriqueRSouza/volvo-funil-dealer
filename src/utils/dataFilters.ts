@@ -18,20 +18,72 @@ function getValue(row: any, possibleKeys: string[]): any {
   return null;
 }
 
+// Função para enriquecer Sheet3 com dados de dealer da Sheet1 usando correlação por ID
+function enrichSheet3WithDealerInfo(sheet3Data: any[], sheet1Data: any[]): any[] {
+  // Criar mapa de ID -> dados completos da Sheet1
+  const sheet1Map = new Map();
+  sheet1Data.forEach(row => {
+    const id = getValue(row, ['ID', 'id', 'Id']);
+    if (id) {
+      sheet1Map.set(String(id).trim(), row);
+    }
+  });
+
+  // Enriquecer Sheet3 com informações de dealer da Sheet1
+  return sheet3Data.map(row => {
+    const id = getValue(row, ['ID', 'id', 'Id']);
+    if (id) {
+      const sheet1Row = sheet1Map.get(String(id).trim());
+      if (sheet1Row) {
+        const dealer = getValue(sheet1Row, ['Dealer', 'dealer', 'Concessionaria', 'concessionaria', 'Concessionária', 'concessionária']);
+        const dateSales = getValue(sheet1Row, ['dateSales', 'DateSales', 'Data', 'data']);
+        
+        return {
+          ...row,
+          Dealer: dealer,
+          dateSales: dateSales
+        };
+      }
+    }
+    return row;
+  });
+}
+
 // Função para filtrar uma aba específica
-function filterSheetData(data: any[], filters: FilterOptions): any[] {
+function filterSheetData(data: any[], filters: FilterOptions, sheet1Data?: any[]): any[] {
   return data.filter(row => {
+    let rowToCheck = row;
+    
+    // Se for Sheet3, precisamos correlacionar com Sheet1 para pegar dealer e data
+    if (sheet1Data && !getValue(row, ['Dealer', 'dealer'])) {
+      const id = getValue(row, ['ID', 'id', 'Id']);
+      if (id) {
+        const matchingSheet1Row = sheet1Data.find(s1Row => {
+          const s1Id = getValue(s1Row, ['ID', 'id', 'Id']);
+          return s1Id && String(s1Id).trim() === String(id).trim();
+        });
+        
+        if (matchingSheet1Row) {
+          rowToCheck = {
+            ...row,
+            Dealer: getValue(matchingSheet1Row, ['Dealer', 'dealer', 'Concessionaria', 'concessionaria', 'Concessionária', 'concessionária']),
+            dateSales: getValue(matchingSheet1Row, ['dateSales', 'DateSales', 'Data', 'data'])
+          };
+        }
+      }
+    }
+
     // Filtro de dealer
     if (filters.selectedDealers.length > 0) {
-      const dealer = getValue(row, ['Dealer', 'dealer', 'Concessionaria', 'concessionaria', 'Concessionária', 'concessionária']);
+      const dealer = getValue(rowToCheck, ['Dealer', 'dealer', 'Concessionaria', 'concessionaria', 'Concessionária', 'concessionária']);
       if (!dealer || !filters.selectedDealers.includes(dealer.trim())) {
         return false;
       }
     }
 
-    // Filtro de data (usar dateSales da Sheet1 como referência)
+    // Filtro de data
     if (filters.dateRange.start || filters.dateRange.end) {
-      const dateValue = getValue(row, ['dateSales', 'DateSales', 'Data', 'data']);
+      const dateValue = getValue(rowToCheck, ['dateSales', 'DateSales', 'Data', 'data']);
       if (dateValue) {
         let date: Date | null = null;
         
@@ -210,10 +262,10 @@ export function applyFilters(originalData: ProcessedData, filters: FilterOptions
     return originalData;
   }
 
-  // Filtrar cada aba
+  // Filtrar cada aba (Sheet3 precisa de correlação com Sheet1)
   const filteredSheet1 = filterSheetData(originalData.rawData.sheet1Data, filters);
   const filteredSheet2 = filterSheetData(originalData.rawData.sheet2Data, filters);
-  const filteredSheet3 = filterSheetData(originalData.rawData.sheet3Data, filters);
+  const filteredSheet3 = filterSheetData(originalData.rawData.sheet3Data, filters, originalData.rawData.sheet1Data);
   const filteredSheet4 = filterSheetData(originalData.rawData.sheet4Data, filters);
 
   // Recalcular métricas

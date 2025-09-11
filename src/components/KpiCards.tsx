@@ -17,9 +17,11 @@ interface KpiData {
 
 interface KpiCardsProps {
   data: KpiData;
+  originalData?: KpiData; // Para mostrar referência total
+  hasFiltersApplied?: boolean;
 }
 
-export default function KpiCards({ data }: KpiCardsProps) {
+export default function KpiCards({ data, originalData, hasFiltersApplied = false }: KpiCardsProps) {
   const metrics = [
     {
       title: 'Tempo Lead → Faturado',
@@ -55,12 +57,25 @@ export default function KpiCards({ data }: KpiCardsProps) {
         {metrics.map((metric, index) => {
           const Icon = metric.icon;
           return (
-            <div key={index} className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow h-full">
+            <div key={index} className="bg-card border rounded-lg p-6 hover:shadow-md transition-shadow h-full relative">
+              {/* Referência Total no canto superior direito */}
+              {hasFiltersApplied && originalData && (
+                <div className="absolute top-2 right-2 text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded text-center min-w-[60px]">
+                  <div className="font-medium">Total BR</div>
+                  <div className="font-mono">
+                    {index === 0 && formatBrazilianNumber(originalData.avgLeadToFaturamento)}
+                    {index === 1 && formatBrazilianNumber(originalData.avgTestDriveToFaturamento)}
+                    {index === 2 && formatBrazilianNumber(originalData.avgTotalJourney)}
+                    {index === 3 && formatBrazilianPercent(originalData.decidedLeadsPercentage)}
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2 rounded-lg bg-primary/10">
                   <Icon className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="text-sm font-semibold text-foreground leading-tight">{metric.title}</h3>
+                <h3 className="text-sm font-semibold text-foreground leading-tight pr-16">{metric.title}</h3>
               </div>
               
               <div className="space-y-3">
