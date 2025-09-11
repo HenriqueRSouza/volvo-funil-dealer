@@ -169,7 +169,7 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
           </div>
         </div>
         
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
           <table className="w-full">
             <thead className="sticky top-0 bg-background z-10">
               <tr className="border-b border-border">
