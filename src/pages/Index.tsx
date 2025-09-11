@@ -221,12 +221,9 @@ export default function Index() {
                 />
               </section>
 
-              {/* Dealers Comparison */}
+              {/* Dealers Comparison - Only show when no dealer filter is applied */}
               {dealerComparison && (
-                <DealersComparison 
-                  data={dealerComparison} 
-                  hasSelectedDealers={filters.selectedDealers.length > 0}
-                />
+                <DealersComparison data={dealerComparison} />
               )}
             </>
           )}
