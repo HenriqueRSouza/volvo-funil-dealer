@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Calendar, CalendarDays, Filter, X } from 'lucide-react';
+import { Calendar, CalendarDays, Filter, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -23,6 +23,7 @@ interface FilterBarProps {
 export default function FilterBar({ dealers, filters, onFiltersChange, originalPeriod }: FilterBarProps) {
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);
+  const [dealersOpen, setDealersOpen] = useState(false);
 
   const handleStartDateSelect = (date: Date | undefined) => {
     onFiltersChange({
@@ -111,7 +112,7 @@ export default function FilterBar({ dealers, filters, onFiltersChange, originalP
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
                   mode="single"
                   selected={filters.dateRange.start || undefined}
@@ -123,7 +124,7 @@ export default function FilterBar({ dealers, filters, onFiltersChange, originalP
                     return false;
                   }}
                   initialFocus
-                  className="p-3 pointer-events-auto"
+                  className="p-3 pointer-events-auto bg-popover border border-border rounded-lg shadow-lg z-50"
                 />
               </PopoverContent>
             </Popover>
@@ -159,7 +160,7 @@ export default function FilterBar({ dealers, filters, onFiltersChange, originalP
                     return false;
                   }}
                   initialFocus
-                  className="p-3 pointer-events-auto"
+                  className="p-3 pointer-events-auto bg-popover border border-border rounded-lg shadow-lg z-50"
                 />
               </PopoverContent>
             </Popover>
@@ -169,27 +170,47 @@ export default function FilterBar({ dealers, filters, onFiltersChange, originalP
         {/* Filtro de Concessionárias */}
         <div className="flex flex-col gap-2 min-w-[200px]">
           <label className="text-xs font-medium text-muted-foreground">Concessionárias</label>
-          <Select onValueChange={handleDealerToggle}>
-            <SelectTrigger className="h-8">
-              <SelectValue placeholder="Selecionar concessionária" />
-            </SelectTrigger>
-            <SelectContent>
-              {dealers.map((dealer) => (
-                <SelectItem 
-                  key={dealer} 
-                  value={dealer}
-                  className="flex items-center justify-between"
-                >
-                  <span>{dealer}</span>
-                  {filters.selectedDealers.includes(dealer) && (
-                    <Badge variant="secondary" className="ml-2 h-4 text-xs">
-                      ✓
-                    </Badge>
-                  )}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={dealersOpen} onOpenChange={setDealersOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "h-8 px-3 justify-between text-left font-normal",
+                  filters.selectedDealers.length === 0 && "text-muted-foreground"
+                )}
+              >
+                <span>
+                  {filters.selectedDealers.length === 0
+                    ? "Selecionar concessionárias"
+                    : filters.selectedDealers.length === 1
+                    ? filters.selectedDealers[0]
+                    : `${filters.selectedDealers.length} concessionárias`
+                  }
+                </span>
+                <ChevronDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0 z-50" align="start">
+              <div className="p-4 space-y-2 max-h-60 overflow-y-auto bg-popover border border-border rounded-lg shadow-lg">
+                {dealers.map((dealer) => (
+                  <div key={dealer} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={dealer}
+                      checked={filters.selectedDealers.includes(dealer)}
+                      onCheckedChange={() => handleDealerToggle(dealer)}
+                    />
+                    <label
+                      htmlFor={dealer}
+                      className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1"
+                    >
+                      {dealer}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
 

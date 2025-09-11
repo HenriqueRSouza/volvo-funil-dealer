@@ -79,7 +79,7 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <div id="dashboard-content">
       {/* Header */}
-      <header className="bg-card border-b border-border">
+      <header className="bg-card border-b border-border relative">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="text-center">
             <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -89,28 +89,28 @@ export default function Index() {
               Leads · Test-drives · Veículos faturados
             </p>
           </div>
+          
+          {/* Período e Export PDF no header */}
+          {data?.period.start && data?.period.end && (
+            <div className="absolute top-4 right-4 space-y-2">
+              <div className="bg-background border border-border rounded-lg px-3 py-2 shadow-md">
+                <p className="text-xs text-muted-foreground font-medium whitespace-nowrap">
+                  Período: {data.period.start.toLocaleDateString('pt-BR')} a {data.period.end.toLocaleDateString('pt-BR')}
+                </p>
+              </div>
+              <Button
+                onClick={handleExportPDF}
+                variant="outline"
+                size="sm"
+                className="w-full gap-2 bg-background border-border shadow-md hover:bg-accent"
+              >
+                <Download className="w-4 h-4" />
+                Exportar PDF
+              </Button>
+            </div>
+          )}
         </div>
       </header>
-
-      {/* Período de Análise e Botão Exportar PDF - Canto superior direito */}
-      {data?.period.start && data?.period.end && (
-        <div className="fixed top-4 right-4 z-50 space-y-2" style={{ position: 'fixed' }}>
-          <div className="bg-background/95 backdrop-blur-md border border-border rounded-lg px-3 py-2 shadow-lg">
-            <p className="text-xs text-muted-foreground font-medium whitespace-nowrap">
-              Período: {data.period.start.toLocaleDateString('pt-BR')} a {data.period.end.toLocaleDateString('pt-BR')}
-            </p>
-          </div>
-          <Button
-            onClick={handleExportPDF}
-            variant="outline"
-            size="sm"
-            className="w-full gap-2 bg-background/95 backdrop-blur-md border-border shadow-lg hover:bg-accent"
-          >
-            <Download className="w-4 h-4" />
-            Exportar PDF
-          </Button>
-        </div>
-      )}
 
       {/* Botão Upload - Canto superior direito */}
       {!originalData && (
