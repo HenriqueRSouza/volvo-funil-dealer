@@ -94,9 +94,9 @@ export default function Index() {
 
       {/* Período de Análise e Botão Exportar PDF - Canto superior direito */}
       {data?.period.start && data?.period.end && (
-        <div className="fixed top-4 right-4 z-20 space-y-2">
-          <div className="bg-background/90 backdrop-blur-sm border border-border/50 rounded-lg px-3 py-2 shadow-sm">
-            <p className="text-xs text-muted-foreground font-medium">
+        <div className="fixed top-4 right-4 z-50 space-y-2" style={{ position: 'fixed' }}>
+          <div className="bg-background/95 backdrop-blur-md border border-border rounded-lg px-3 py-2 shadow-lg">
+            <p className="text-xs text-muted-foreground font-medium whitespace-nowrap">
               Período: {data.period.start.toLocaleDateString('pt-BR')} a {data.period.end.toLocaleDateString('pt-BR')}
             </p>
           </div>
@@ -104,7 +104,7 @@ export default function Index() {
             onClick={handleExportPDF}
             variant="outline"
             size="sm"
-            className="w-full gap-2 bg-background/90 backdrop-blur-sm"
+            className="w-full gap-2 bg-background/95 backdrop-blur-md border-border shadow-lg hover:bg-accent"
           >
             <Download className="w-4 h-4" />
             Exportar PDF
