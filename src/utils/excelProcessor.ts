@@ -335,9 +335,12 @@ function calculateMetrics(sheet1Data: any[], sheet2Data: any[], sheet3Data: any[
   console.info('📊 Resultados:');
   console.info(`  - Leads com test drive: ${leadsWithTestDrive}`);
   console.info(`  - Leads faturados: ${leadsFaturados}`);
-  console.info(`  - Test drives faturados: ${testDrivesFaturados}`);
+  console.info(`  - Test drives faturados (Sheet2 flag): ${testDrivesFaturados}`);
   console.info(`  - Leads diretos: ${leadsDiretos}`);
   console.info(`  - Total faturados: ${totalFaturados}`);
+  console.info('📊 Funil Test Drive → Faturados (Sheet2):');
+  console.info(`  - Test Drives: ${totalTestDrives}`);
+  console.info(`  - Vendas (flag Sheet2): ${testDrivesFaturados}`);
 
   // Métricas dos funis
   const funnelMetrics: FunnelMetrics = {

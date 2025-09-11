@@ -187,8 +187,12 @@ function calculateFilteredMetrics(
   // Total de faturados
   const totalFaturados = totalFaturamentos > 0 ? totalFaturamentos : leadsFaturados + testDrivesFaturados;
 
-  // Vendas do funil Test Drive -> Faturados
-  const vendasTD = (filters.selectedDealers.length > 0) ? totalFaturamentos : testDrivesFaturados;
+  // Vendas do funil Test Drive -> Faturados (sempre da Sheet2 com flag)
+  const vendasTD = testDrivesFaturados;
+
+  console.info('📊 Funil Test Drive → Faturados:');
+  console.info(`  - Total Test Drives (Sheet2): ${totalTestDrives}`);
+  console.info(`  - Test Drives Faturados (Sheet2 flag): ${testDrivesFaturados}`);
 
   // Métricas dos funis
   const funnelMetrics: FunnelMetrics = {
