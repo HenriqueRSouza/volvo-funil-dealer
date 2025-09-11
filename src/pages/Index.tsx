@@ -46,6 +46,15 @@ export default function Index() {
     return applyFilters(originalData, filters);
   }, [originalData, filters]);
 
+  // Dados BR para o período selecionado (sem filtro de dealer)
+  const brDataForPeriod = useMemo(() => {
+    if (!originalData) return null;
+    return applyFilters(originalData, {
+      dateRange: filters.dateRange,
+      selectedDealers: [] // Sem filtro de dealer para manter baseline nacional
+    });
+  }, [originalData, filters.dateRange]);
+
   // Calcular dados de comparação de dealers (apenas quando não há filtros de dealer)
   const dealerComparison = useMemo(() => {
     if (!originalData || filters.selectedDealers.length > 0) return null;
@@ -199,24 +208,20 @@ export default function Index() {
                     leadsFaturadosCount: data.leadsFaturadosCount,
                     funnelMetrics: data.funnelMetrics
                   }}
-                  originalData={originalData ? {
-                    avgLeadToTestDrive: originalData.avgLeadToTestDrive,
-                    avgTestDriveToFaturamento: originalData.avgTestDriveToFaturamento,
-                    avgTotalJourney: originalData.avgTotalJourney,
-                    avgLeadToFaturamento: originalData.avgLeadToFaturamento,
-                    leads: originalData.leads,
-                    testDrives: originalData.testDrives,
-                    faturados: originalData.faturados,
-                    decidedLeadsCount: originalData.decidedLeadsCount,
-                    decidedLeadsPercentage: originalData.decidedLeadsPercentage,
-                    leadsFaturadosCount: originalData.leadsFaturadosCount,
-                    funnelMetrics: originalData.funnelMetrics
+                  originalData={brDataForPeriod ? {
+                    avgLeadToTestDrive: brDataForPeriod.avgLeadToTestDrive,
+                    avgTestDriveToFaturamento: brDataForPeriod.avgTestDriveToFaturamento,
+                    avgTotalJourney: brDataForPeriod.avgTotalJourney,
+                    avgLeadToFaturamento: brDataForPeriod.avgLeadToFaturamento,
+                    leads: brDataForPeriod.leads,
+                    testDrives: brDataForPeriod.testDrives,
+                    faturados: brDataForPeriod.faturados,
+                    decidedLeadsCount: brDataForPeriod.decidedLeadsCount,
+                    decidedLeadsPercentage: brDataForPeriod.decidedLeadsPercentage,
+                    leadsFaturadosCount: brDataForPeriod.leadsFaturadosCount,
+                    funnelMetrics: brDataForPeriod.funnelMetrics
                   } : undefined}
-                  hasFiltersApplied={
-                    filters.selectedDealers.length > 0 || 
-                    filters.dateRange.start !== null || 
-                    filters.dateRange.end !== null
-                  }
+                  hasFiltersApplied={filters.selectedDealers.length > 0}
                 />
               </section>
 
@@ -225,11 +230,7 @@ export default function Index() {
                 <MultipleFunnels 
                   data={data.funnelMetrics}
                   originalData={originalData?.funnelMetrics}
-                  hasFiltersApplied={
-                    filters.selectedDealers.length > 0 || 
-                    filters.dateRange.start !== null || 
-                    filters.dateRange.end !== null
-                  }
+                  hasFiltersApplied={filters.selectedDealers.length > 0}
                 />
               </section>
 
