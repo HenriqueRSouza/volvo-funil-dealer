@@ -6,9 +6,12 @@ export interface DealerMetrics {
   leads: number;
   testDrives: number;
   sales: number;
+  storeVisits: number;
   leadsToTestDriveRate: number;
   testDriveToSalesRate: number;
   totalConversionRate: number;
+  visitasToTestDriveRate: number;
+  visitasToSalesRate: number;
 }
 
 export interface DealerComparisonData {
@@ -96,6 +99,7 @@ export function calculateDealerComparison(
     leads: number;
     testDrives: number;
     sales: number;
+    storeVisits: number;
     leadsWithTestDrive: number;
     testDrivesFaturados: number;
   }>();
@@ -109,6 +113,7 @@ export function calculateDealerComparison(
           leads: 0,
           testDrives: 0,
           sales: 0,
+          storeVisits: 0,
           leadsWithTestDrive: 0,
           testDrivesFaturados: 0
         });
@@ -140,6 +145,7 @@ export function calculateDealerComparison(
           leads: 0,
           testDrives: 0,
           sales: 0,
+          storeVisits: 0,
           leadsWithTestDrive: 0,
           testDrivesFaturados: 0
         });
@@ -165,6 +171,7 @@ export function calculateDealerComparison(
           leads: 0,
           testDrives: 0,
           sales: 0,
+          storeVisits: 0,
           leadsWithTestDrive: 0,
           testDrivesFaturados: 0
         });
@@ -172,6 +179,31 @@ export function calculateDealerComparison(
       
       const dealerData = dealerDataMap.get(dealer)!;
       dealerData.sales++;
+    }
+  });
+
+  // Processar Sheet5 (Visitas nas Lojas)
+  filteredData.rawData.sheet5Data.forEach(row => {
+    const dealer = getDealerFromRow(row, 'Sheet5');
+    if (dealer) {
+      if (!dealerDataMap.has(dealer)) {
+        dealerDataMap.set(dealer, {
+          leads: 0,
+          testDrives: 0,
+          sales: 0,
+          storeVisits: 0,
+          leadsWithTestDrive: 0,
+          testDrivesFaturados: 0
+        });
+      }
+      
+      const dealerData = dealerDataMap.get(dealer)!;
+      // A coluna C deve conter o número de visitas
+      const keys = Object.keys(row);
+      const visitasValue = keys[2] ? row[keys[2]] : null; // Coluna C (índice 2)
+      if (visitasValue && !isNaN(Number(visitasValue))) {
+        dealerData.storeVisits += Number(visitasValue);
+      }
     }
   });
   
@@ -186,15 +218,20 @@ export function calculateDealerComparison(
     const leadsToTestDriveRate = data.leads > 0 ? (data.leadsWithTestDrive / data.leads) * 100 : 0;
     const testDriveToSalesRate = data.testDrives > 0 ? (data.testDrivesFaturados / data.testDrives) * 100 : 0;
     const totalConversionRate = data.leads > 0 ? (data.sales / data.leads) * 100 : 0;
+    const visitasToTestDriveRate = data.storeVisits > 0 ? (data.testDrives / data.storeVisits) * 100 : 0;
+    const visitasToSalesRate = data.storeVisits > 0 ? (data.sales / data.storeVisits) * 100 : 0;
     
     return {
       dealerName,
       leads: data.leads,
       testDrives: data.testDrives,
       sales: data.sales,
+      storeVisits: data.storeVisits,
       leadsToTestDriveRate,
       testDriveToSalesRate,
-      totalConversionRate
+      totalConversionRate,
+      visitasToTestDriveRate,
+      visitasToSalesRate
     };
   });
   
@@ -203,12 +240,14 @@ export function calculateDealerComparison(
     leads: acc.leads + dealer.leads,
     testDrives: acc.testDrives + dealer.testDrives,
     sales: acc.sales + dealer.sales,
+    storeVisits: acc.storeVisits + dealer.storeVisits,
     leadsWithTestDrive: acc.leadsWithTestDrive + (dealer.leads * dealer.leadsToTestDriveRate / 100),
     testDrivesFaturados: acc.testDrivesFaturados + (dealer.testDrives * dealer.testDriveToSalesRate / 100)
   }), {
     leads: 0,
     testDrives: 0,
     sales: 0,
+    storeVisits: 0,
     leadsWithTestDrive: 0,
     testDrivesFaturados: 0
   });
@@ -218,9 +257,12 @@ export function calculateDealerComparison(
     leads: totals.leads,
     testDrives: totals.testDrives,
     sales: totals.sales,
+    storeVisits: totals.storeVisits,
     leadsToTestDriveRate: totals.leads > 0 ? (totals.leadsWithTestDrive / totals.leads) * 100 : 0,
     testDriveToSalesRate: totals.testDrives > 0 ? (totals.testDrivesFaturados / totals.testDrives) * 100 : 0,
-    totalConversionRate: totals.leads > 0 ? (totals.sales / totals.leads) * 100 : 0
+    totalConversionRate: totals.leads > 0 ? (totals.sales / totals.leads) * 100 : 0,
+    visitasToTestDriveRate: totals.storeVisits > 0 ? (totals.testDrives / totals.storeVisits) * 100 : 0,
+    visitasToSalesRate: totals.storeVisits > 0 ? (totals.sales / totals.storeVisits) * 100 : 0
   };
   
   // Ordenar dealers por total de leads (maior para menor)

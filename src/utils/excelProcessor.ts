@@ -17,6 +17,14 @@ export interface FunnelMetrics {
     leads: number;
     faturados: number;
   };
+  visitasTestDrive: {
+    visitas: number;
+    testDrives: number;
+  };
+  visitasFaturamento: {
+    visitas: number;
+    faturados: number;
+  };
 }
 
 export interface RawSheetData {
@@ -379,6 +387,14 @@ function calculateMetrics(sheet1Data: any[], sheet2Data: any[], sheet3Data: any[
     jornadaCompleta: {
       leads: totalLeads,
       faturados: totalJornadaCompleta
+    },
+    visitasTestDrive: {
+      visitas: totalStoreVisits,
+      testDrives: totalTestDrives
+    },
+    visitasFaturamento: {
+      visitas: totalStoreVisits,
+      faturados: totalFaturados
     }
   };
 

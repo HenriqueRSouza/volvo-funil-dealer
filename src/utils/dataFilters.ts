@@ -250,6 +250,14 @@ function calculateFilteredMetrics(
     jornadaCompleta: {
       leads: totalLeads,
       faturados: totalJornadaCompleta
+    },
+    visitasTestDrive: {
+      visitas: totalStoreVisits,
+      testDrives: totalTestDrives
+    },
+    visitasFaturamento: {
+      visitas: totalStoreVisits,
+      faturados: totalFaturados
     }
   };
 

@@ -9,7 +9,7 @@ interface DealersComparisonProps {
   data: DealerComparisonData;
 }
 
-type SortField = 'dealerName' | 'leads' | 'testDrives' | 'sales' | 'leadsToTestDriveRate' | 'testDriveToSalesRate';
+type SortField = 'dealerName' | 'leads' | 'testDrives' | 'sales' | 'storeVisits' | 'leadsToTestDriveRate' | 'testDriveToSalesRate' | 'visitasToTestDriveRate' | 'visitasToSalesRate';
 type SortDirection = 'asc' | 'desc';
 
 export default function DealersComparison({ data }: DealersComparisonProps) {
@@ -19,10 +19,13 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
   const sortOptions = [
     { value: 'dealerName', label: 'Nome (A-Z)' },
     { value: 'leads', label: 'Quantidade de Leads' },
+    { value: 'storeVisits', label: 'Quantidade de Visitas' },
     { value: 'testDrives', label: 'Quantidade de Test Drives' },
     { value: 'sales', label: 'Quantidade de Vendas' },
     { value: 'leadsToTestDriveRate', label: 'Taxa Lead → TD' },
     { value: 'testDriveToSalesRate', label: 'Taxa TD → Venda' },
+    { value: 'visitasToTestDriveRate', label: 'Taxa Visitas → TD' },
+    { value: 'visitasToSalesRate', label: 'Taxa Visitas → Venda' },
   ] as const;
 
   const formatNumber = (value: number): string => {
@@ -177,6 +180,9 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
                   Concessionária
                 </th>
                 <th className="text-right py-3 px-2 font-medium text-foreground bg-background">
+                  Visitas
+                </th>
+                <th className="text-right py-3 px-2 font-medium text-foreground bg-background">
                   Leads
                 </th>
                 <th className="text-right py-3 px-2 font-medium text-foreground bg-background">
@@ -191,16 +197,25 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
                 <th className="text-right py-3 px-2 font-medium text-foreground bg-background">
                   Taxa TD→Venda
                 </th>
+                <th className="text-right py-3 px-2 font-medium text-foreground bg-background">
+                  Taxa Visitas→TD
+                </th>
+                <th className="text-right py-3 px-2 font-medium text-foreground bg-background">
+                  Taxa Visitas→Venda
+                </th>
               </tr>
               
               {/* Linha de referência BR */}
               <tr className="bg-secondary/30 border-b border-border sticky top-[49px] z-10">
                 <td className="py-2 px-2 font-medium text-primary bg-secondary/30">Total BR</td>
+                <td className="text-right py-2 px-2 text-sm font-medium bg-secondary/30">{formatNumber(data.brMetrics.storeVisits)}</td>
                 <td className="text-right py-2 px-2 text-sm font-medium bg-secondary/30">{formatNumber(data.brMetrics.leads)}</td>
                 <td className="text-right py-2 px-2 text-sm font-medium bg-secondary/30">{formatNumber(data.brMetrics.testDrives)}</td>
                 <td className="text-right py-2 px-2 text-sm font-medium bg-secondary/30">{formatNumber(data.brMetrics.sales)}</td>
                 <td className="text-right py-2 px-2 text-sm font-medium bg-secondary/30">{formatPercentage(data.brMetrics.leadsToTestDriveRate)}</td>
                 <td className="text-right py-2 px-2 text-sm font-medium bg-secondary/30">{formatPercentage(data.brMetrics.testDriveToSalesRate)}</td>
+                <td className="text-right py-2 px-2 text-sm font-medium bg-secondary/30">{formatPercentage(data.brMetrics.visitasToTestDriveRate)}</td>
+                <td className="text-right py-2 px-2 text-sm font-medium bg-secondary/30">{formatPercentage(data.brMetrics.visitasToSalesRate)}</td>
               </tr>
             </thead>
             
@@ -208,6 +223,12 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
               {sortedDealers.map((dealer) => (
                 <tr key={dealer.dealerName} className="border-b border-border/50 hover:bg-accent/20">
                   <td className="py-3 px-2 font-medium">{dealer.dealerName}</td>
+                  <td className="text-right py-3 px-2">
+                    <AbsoluteValueCell 
+                      dealerValue={dealer.storeVisits} 
+                      totalBrValue={data.brMetrics.storeVisits}
+                    />
+                  </td>
                   <td className="text-right py-3 px-2">
                     <AbsoluteValueCell 
                       dealerValue={dealer.leads} 
@@ -236,6 +257,18 @@ export default function DealersComparison({ data }: DealersComparisonProps) {
                     <PerformanceCell 
                       dealerValue={dealer.testDriveToSalesRate} 
                       brValue={data.brMetrics.testDriveToSalesRate}
+                    />
+                  </td>
+                  <td className="text-right py-3 px-2">
+                    <PerformanceCell 
+                      dealerValue={dealer.visitasToTestDriveRate} 
+                      brValue={data.brMetrics.visitasToTestDriveRate}
+                    />
+                  </td>
+                  <td className="text-right py-3 px-2">
+                    <PerformanceCell 
+                      dealerValue={dealer.visitasToSalesRate} 
+                      brValue={data.brMetrics.visitasToSalesRate}
                     />
                   </td>
                 </tr>

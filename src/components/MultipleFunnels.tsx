@@ -1,4 +1,4 @@
-import { Users, Car, DollarSign, Target, TrendingUp } from 'lucide-react';
+import { Users, Car, DollarSign, Target, TrendingUp, Store, ShoppingBag } from 'lucide-react';
 import { FunnelMetrics } from '@/utils/excelProcessor';
 
 interface MultipleFunnelsProps {
@@ -57,6 +57,26 @@ export default function MultipleFunnels({ data, originalData, hasFiltersApplied 
       to: formatNumber(data.testDrivesVendidos.vendas),
       fromLabel: 'Test Drives',
       toLabel: 'Faturados'
+    },
+    {
+      title: 'Visitas → Test Drive',
+      description: 'Taxa indicativa: visitas que realizaram test drive',
+      icon: Store,
+      conversion: calculateConversion(data.visitasTestDrive.visitas, data.visitasTestDrive.testDrives),
+      from: formatNumber(data.visitasTestDrive.visitas),
+      to: formatNumber(data.visitasTestDrive.testDrives),
+      fromLabel: 'Visitas',
+      toLabel: 'Test Drives'
+    },
+    {
+      title: 'Visitas → Faturamento',
+      description: 'Taxa indicativa: visitas que resultaram em compra',
+      icon: ShoppingBag,
+      conversion: calculateConversion(data.visitasFaturamento.visitas, data.visitasFaturamento.faturados),
+      from: formatNumber(data.visitasFaturamento.visitas),
+      to: formatNumber(data.visitasFaturamento.faturados),
+      fromLabel: 'Visitas',
+      toLabel: 'Faturados'
     }
   ];
 
@@ -66,7 +86,7 @@ export default function MultipleFunnels({ data, originalData, hasFiltersApplied 
         Análise de Funis de Conversão
       </h2>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {conversionCards.map((card, index) => {
           const Icon = card.icon;
           return (
@@ -80,6 +100,8 @@ export default function MultipleFunnels({ data, originalData, hasFiltersApplied 
                     {index === 1 && calculateConversion(originalData.jornadaCompleta.leads, originalData.jornadaCompleta.faturados)}
                     {index === 2 && calculateConversion(originalData.leadsComTestDrive.leads, originalData.leadsComTestDrive.testDrives)}
                     {index === 3 && calculateConversion(originalData.testDrivesVendidos.testDrives, originalData.testDrivesVendidos.vendas)}
+                    {index === 4 && calculateConversion(originalData.visitasTestDrive.visitas, originalData.visitasTestDrive.testDrives)}
+                    {index === 5 && calculateConversion(originalData.visitasFaturamento.visitas, originalData.visitasFaturamento.faturados)}
                   </div>
                 </div>
               )}
