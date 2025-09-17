@@ -24,6 +24,7 @@ export interface RawSheetData {
   sheet2Data: any[];
   sheet3Data: any[];
   sheet4Data: any[];
+  sheet5Data: any[];
 }
 
 export interface ProcessedData {
@@ -34,6 +35,7 @@ export interface ProcessedData {
   leads: number;
   testDrives: number;
   faturados: number;
+  totalStoreVisits: number;
   decidedLeadsCount: number;
   decidedLeadsPercentage: number;
   leadsFaturadosCount: number;
@@ -112,12 +114,15 @@ export async function processExcelFile(file: File): Promise<ProcessedData> {
           throw new Error(`Esperado pelo menos 3 abas na planilha, encontradas apenas ${workbook.SheetNames.length}`);
         }
 
-        // Processar as abas (3 ou 4)
+        // Processar as abas (3, 4 ou 5)
         const sheet1Data: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
         const sheet2Data: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[1]]);
         const sheet3Data: any[] = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[2]]);
         const sheet4Data: any[] = workbook.SheetNames.length >= 4 
           ? XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[3]]) 
+          : [];
+        const sheet5Data: any[] = workbook.SheetNames.length >= 5 
+          ? XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[4]]) 
           : [];
 
         console.info('📝 Dados encontrados:');
@@ -125,6 +130,7 @@ export async function processExcelFile(file: File): Promise<ProcessedData> {
         console.info(`  - Sheet2 (Test Drives): ${sheet2Data.length} linhas`);
         console.info(`  - Sheet3 (Jornada Completa): ${sheet3Data.length} linhas`);
         console.info(`  - Sheet4 (Faturamentos): ${sheet4Data.length} linhas`);
+        console.info(`  - Sheet5 (Visitas nas Lojas): ${sheet5Data.length} linhas`);
 
         if (sheet1Data.length === 0) {
           throw new Error('Nenhum dado encontrado na Sheet1');
@@ -177,7 +183,7 @@ export async function processExcelFile(file: File): Promise<ProcessedData> {
         const dealers = extractDealers(sheet1Data, sheet2Data, sheet3Data, sheet4Data);
 
         // Processar métricas
-        const metrics = calculateMetrics(sheet1Data, sheet2Data, sheet3Data, sheet4Data);
+        const metrics = calculateMetrics(sheet1Data, sheet2Data, sheet3Data, sheet4Data, sheet5Data);
         
         // Criar resultado completo com período
         const result: ProcessedData = {
@@ -190,7 +196,8 @@ export async function processExcelFile(file: File): Promise<ProcessedData> {
             sheet1Data,
             sheet2Data,
             sheet3Data,
-            sheet4Data
+            sheet4Data,
+            sheet5Data
           },
           dealers
         };
@@ -289,19 +296,32 @@ function extractDealers(sheet1Data: any[], sheet2Data: any[], sheet3Data: any[],
   return dealers;
 }
 
-function calculateMetrics(sheet1Data: any[], sheet2Data: any[], sheet3Data: any[], sheet4Data: any[] = []): Omit<ProcessedData, 'period' | 'rawData' | 'dealers'> {
-  
+function calculateMetrics(sheet1Data: any[], sheet2Data: any[], sheet3Data: any[], sheet4Data: any[] = [], sheet5Data: any[] = []): Omit<ProcessedData, 'period' | 'rawData' | 'dealers'> {
   // Contadores básicos
   const totalLeads = sheet1Data.length;
   const totalTestDrives = sheet2Data.length;
   const totalJornadaCompleta = sheet3Data.length;
   const totalFaturamentos = sheet4Data.length;
   
+  // Calcular total de visitas nas lojas (soma da coluna C da Sheet5)
+  let totalStoreVisits = 0;
+  if (sheet5Data && sheet5Data.length > 0) {
+    sheet5Data.forEach(row => {
+      // A coluna C deve conter o número de visitas
+      const keys = Object.keys(row);
+      const visitasValue = keys[2] ? row[keys[2]] : null; // Coluna C (índice 2)
+      if (visitasValue && !isNaN(Number(visitasValue))) {
+        totalStoreVisits += Number(visitasValue);
+      }
+    });
+  }
+  
   console.info('📊 Métricas calculadas:');
   console.info(`  - Sheet1 (Leads): ${totalLeads} linhas`);
   console.info(`  - Sheet2 (Test Drives): ${totalTestDrives} linhas`);
   console.info(`  - Sheet3 (Jornada Completa): ${totalJornadaCompleta} linhas`);
   console.info(`  - Sheet4 (Faturamentos): ${totalFaturamentos} linhas`);
+  console.info(`  - Sheet5 (Visitas nas Lojas): ${totalStoreVisits} visitas`);
 
   // Análise Sheet1 - Leads
   const leadsWithTestDrive = sheet1Data.filter(row => {
@@ -440,6 +460,7 @@ function calculateMetrics(sheet1Data: any[], sheet2Data: any[], sheet3Data: any[
     leads: totalLeads,
     testDrives: totalTestDrives,
     faturados: totalFaturados,
+    totalStoreVisits,
     decidedLeadsCount,
     decidedLeadsPercentage,
     leadsFaturadosCount: totalLeadsFaturados,

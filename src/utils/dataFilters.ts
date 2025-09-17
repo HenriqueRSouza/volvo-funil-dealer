@@ -97,6 +97,7 @@ function filterSheetData(data: any[], filters: FilterOptions, sheet1Data?: any[]
         const keys = Object.keys(rowToCheck);
         if (sheetName === 'Sheet2' && keys[3]) dealer = rowToCheck[keys[3]]; // Coluna D
         if (sheetName === 'Sheet4' && keys[5]) dealer = rowToCheck[keys[5]]; // Coluna F
+        if (sheetName === 'Sheet5' && keys[0]) dealer = rowToCheck[keys[0]]; // Coluna A
       }
       const dealerStr = dealer !== undefined && dealer !== null ? String(dealer).trim() : '';
       if (!dealerStr || !filters.selectedDealers.includes(dealerStr)) {
@@ -119,6 +120,12 @@ function filterSheetData(data: any[], filters: FilterOptions, sheet1Data?: any[]
       if (!dateValue && sheetName === 'Sheet4') {
         const keys = Object.keys(rowToCheck);
         if (keys[3]) dateValue = rowToCheck[keys[3]]; // Coluna D
+      }
+
+      // Para Sheet5, a data está na coluna B (índice 1)  
+      if (!dateValue && sheetName === 'Sheet5') {
+        const keys = Object.keys(rowToCheck);
+        if (keys[1]) dateValue = rowToCheck[keys[1]]; // Coluna B
       }
       
       if (dateValue) {
@@ -161,6 +168,7 @@ function calculateFilteredMetrics(
   filteredSheet2: any[], 
   filteredSheet3: any[], 
   filteredSheet4: any[],
+  filteredSheet5: any[],
   filters: FilterOptions
 ): Omit<ProcessedData, 'period' | 'rawData' | 'dealers'> {
   // Contadores básicos
@@ -169,11 +177,25 @@ function calculateFilteredMetrics(
   const totalJornadaCompleta = filteredSheet3.length;
   const totalFaturamentos = filteredSheet4.length;
 
+  // Calcular total de visitas nas lojas filtradas (soma da coluna C da Sheet5)
+  let totalStoreVisits = 0;
+  if (filteredSheet5 && filteredSheet5.length > 0) {
+    filteredSheet5.forEach(row => {
+      // A coluna C deve conter o número de visitas
+      const keys = Object.keys(row);
+      const visitasValue = keys[2] ? row[keys[2]] : null; // Coluna C (índice 2)
+      if (visitasValue && !isNaN(Number(visitasValue))) {
+        totalStoreVisits += Number(visitasValue);
+      }
+    });
+  }
+
   console.info('📊 Métricas filtradas calculadas:');
   console.info(`  - Sheet1 filtrada (Leads): ${totalLeads} linhas`);
   console.info(`  - Sheet2 filtrada (Test Drives): ${totalTestDrives} linhas`);
   console.info(`  - Sheet3 filtrada (Jornada Completa): ${totalJornadaCompleta} linhas`);
   console.info(`  - Sheet4 filtrada (Faturamentos): ${totalFaturamentos} linhas`);
+  console.info(`  - Sheet5 filtrada (Visitas nas Lojas): ${totalStoreVisits} visitas`);
 
   // Análise Sheet1 - Leads
   const leadsWithTestDrive = filteredSheet1.filter(row => {
@@ -309,6 +331,7 @@ function calculateFilteredMetrics(
     leads: totalLeads,
     testDrives: totalTestDrives,
     faturados: totalFaturados,
+    totalStoreVisits,
     decidedLeadsCount,
     decidedLeadsPercentage,
     leadsFaturadosCount: totalLeadsFaturados,
@@ -327,14 +350,15 @@ export function applyFilters(originalData: ProcessedData, filters: FilterOptions
   const filteredSheet2 = filterSheetData(originalData.rawData.sheet2Data, filters, originalData.rawData.sheet1Data, 'Sheet2');
   const filteredSheet3 = filterSheetData(originalData.rawData.sheet3Data, filters, originalData.rawData.sheet1Data, 'Sheet3');
   const filteredSheet4 = filterSheetData(originalData.rawData.sheet4Data, filters, undefined, 'Sheet4');
+  const filteredSheet5 = filterSheetData(originalData.rawData.sheet5Data || [], filters, undefined, 'Sheet5');
 
   // Recalcular métricas
-  const newMetrics = calculateFilteredMetrics(filteredSheet1, filteredSheet2, filteredSheet3, filteredSheet4, filters);
+  const newMetrics = calculateFilteredMetrics(filteredSheet1, filteredSheet2, filteredSheet3, filteredSheet4, filteredSheet5, filters);
 
   // Calcular novo período baseado nos dados filtrados
   const allFilteredDates: Date[] = [];
   
-  [...filteredSheet1, ...filteredSheet2, ...filteredSheet3, ...filteredSheet4].forEach((row, index) => {
+  [...filteredSheet1, ...filteredSheet2, ...filteredSheet3, ...filteredSheet4, ...filteredSheet5].forEach((row, index) => {
     let dateValue = getValue(row, ['dateSales', 'DateSales', 'Data', 'data']);
     
     // Para Sheet2, procurar na coluna E
@@ -347,6 +371,12 @@ export function applyFilters(originalData: ProcessedData, filters: FilterOptions
     if (!dateValue && index >= filteredSheet1.length + filteredSheet2.length + filteredSheet3.length) {
       const keys = Object.keys(row);
       if (keys[3]) dateValue = row[keys[3]]; // Coluna D
+    }
+
+    // Para Sheet5, procurar na coluna B (data)
+    if (!dateValue && index >= filteredSheet1.length + filteredSheet2.length + filteredSheet3.length + filteredSheet4.length) {
+      const keys = Object.keys(row);
+      if (keys[1]) dateValue = row[keys[1]]; // Coluna B
     }
     
     if (dateValue) {
@@ -383,7 +413,8 @@ export function applyFilters(originalData: ProcessedData, filters: FilterOptions
       sheet1Data: filteredSheet1,
       sheet2Data: filteredSheet2,
       sheet3Data: filteredSheet3,
-      sheet4Data: filteredSheet4
+      sheet4Data: filteredSheet4,
+      sheet5Data: filteredSheet5
     },
     dealers: originalData.dealers // Manter lista original de dealers
   };

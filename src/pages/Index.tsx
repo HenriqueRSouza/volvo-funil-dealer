@@ -186,7 +186,7 @@ export default function Index() {
               <section>
                 <GeneralFunnel data={{
                   totalLeads: data.leads,
-                  totalStoreVisits: 0, // Não disponível nos dados atuais
+                  totalStoreVisits: data.totalStoreVisits,
                   totalTestDrives: data.testDrives,
                   totalSales: data.faturados
                 }} />
