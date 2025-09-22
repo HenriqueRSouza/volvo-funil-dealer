@@ -130,8 +130,8 @@ function filterSheetData(data: any[], filters: FilterOptions, sheet1Data?: any[]
       }
     }
 
-    // Filtro de data
-    if (filters.dateRange.start || filters.dateRange.end) {
+    // Filtro de data (pular Sheet5 pois já contém dados do período específico)
+    if ((filters.dateRange.start || filters.dateRange.end) && sheetName !== 'Sheet5') {
       let dateValue = getValue(rowToCheck, ['dateSales', 'DateSales', 'Data', 'data']);
       
       // Para Sheet2, a data pode estar na coluna E (índice 4)
