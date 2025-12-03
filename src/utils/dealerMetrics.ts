@@ -42,41 +42,11 @@ function normalizeDealerName(dealerName: string): string {
 }
 
 // Função para extrair dealer de uma linha, considerando diferentes sheets
-function getDealerFromRow(row: any, sheetName: string, sheet1Data?: any[]): string | null {
-  // Primeiro, tentar extrair dealer diretamente da linha
-  let dealer = getValue(row, ['Dealer', 'dealer', 'Concessionaria', 'concessionaria', 'Concessionária', 'concessionária']);
-  
-  if (!dealer) {
-    const keys = Object.keys(row);
-    // Para Sheet2, dealer pode estar na coluna D (índice 3)
-    if (sheetName === 'Sheet2' && keys[3]) {
-      dealer = row[keys[3]];
-    }
-    // Para Sheet4, dealer pode estar na coluna F (índice 5)
-    if (sheetName === 'Sheet4' && keys[5]) {
-      dealer = row[keys[5]];
-    }
-    // Para Sheet5, dealer pode estar na coluna A (índice 0)
-    if (sheetName === 'Sheet5' && keys[0]) {
-      dealer = row[keys[0]];
-    }
-  }
-  
-  // Se não encontrou e tem dados da Sheet1 para correlação
-  if (!dealer && sheet1Data) {
-    const id = getValue(row, ['ID', 'id', 'Id']);
-    if (id) {
-      const matchingSheet1Row = sheet1Data.find(s1Row => {
-        const s1Id = getValue(s1Row, ['ID', 'id', 'Id']);
-        return s1Id && String(s1Id).trim() === String(id).trim();
-      });
-      
-      if (matchingSheet1Row) {
-        dealer = getValue(matchingSheet1Row, ['Dealer', 'dealer', 'Concessionaria', 'concessionaria', 'Concessionária', 'concessionária']);
-      }
-    }
-  }
-  
+function getDealerFromRow(row: any): string | null {
+  if (!row) return null;
+
+  // Todas as fontes usam 'dealer'
+  const dealer = getValue(row, ['dealer', 'Dealer']);
   return dealer ? String(dealer).trim() : null;
 }
 
@@ -140,7 +110,7 @@ export function calculateDealerComparison(
   
   // Processar Sheet1 (Leads)
   filteredData.rawData.sheet1Data.forEach(row => {
-    const dealer = getDealerFromRow(row, 'Sheet1');
+    const dealer = getDealerFromRow(row);
     if (dealer) {
       const dealerData = getDealerData(dealer);
       dealerData.leads++;
@@ -161,7 +131,7 @@ export function calculateDealerComparison(
   
   // Processar Sheet2 (Test Drives)
   filteredData.rawData.sheet2Data.forEach(row => {
-    const dealer = getDealerFromRow(row, 'Sheet2', filteredData.rawData.sheet1Data);
+    const dealer = getDealerFromRow(row);
     if (dealer) {
       const dealerData = getDealerData(dealer);
       dealerData.testDrives++;
@@ -176,7 +146,7 @@ export function calculateDealerComparison(
   
   // Processar Sheet4 (Vendas diretas)
   filteredData.rawData.sheet4Data.forEach(row => {
-    const dealer = getDealerFromRow(row, 'Sheet4');
+    const dealer = getDealerFromRow(row);
     if (dealer) {
       const dealerData = getDealerData(dealer);
       dealerData.sales++;
@@ -185,7 +155,7 @@ export function calculateDealerComparison(
 
   // Processar Sheet5 (Visitas nas Lojas)
   filteredData.rawData.sheet5Data.forEach(row => {
-    const dealer = getDealerFromRow(row, 'Sheet5');
+    const dealer = getDealerFromRow(row);
     if (dealer) {
       const dealerData = getDealerData(dealer);
       // A coluna C deve conter o número de visitas

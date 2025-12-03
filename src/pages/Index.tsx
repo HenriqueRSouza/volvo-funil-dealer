@@ -1,12 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import UploadZone from '@/components/UploadZone';
 import KpiCards from '@/components/KpiCards';
+import * as React from "react";
 import SalesFunnel from '@/components/SalesFunnel';
 import MultipleFunnels from '@/components/MultipleFunnels';
 import GeneralFunnel from '@/components/GeneralFunnel';
 import DealersComparison from '@/components/DealersComparison';
 import FilterBar from '@/components/FilterBar';
-import { processExcelFile, ProcessedData } from '@/utils/excelProcessor';
+import { processExcelFile, processApiAndExcel, ProcessedData } from '@/utils/excelProcessor';
 import { applyFilters, FilterOptions } from '@/utils/dataFilters';
 import { calculateDealerComparison } from '@/utils/dealerMetrics';
 import { useToast } from '@/hooks/use-toast';
@@ -18,11 +19,29 @@ export default function Index() {
   const [originalData, setOriginalData] = useState<ProcessedData | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loadingStatus, setLoadingStatus] = useState<"parcial" | "carregando" | "completo">("parcial");
   const [filters, setFilters] = useState<FilterOptions>({
     dateRange: { start: null, end: null },
     selectedDealers: []
   });
   const { toast } = useToast();
+
+  // Carregar dados automaticamente da API ao iniciar
+  useEffect(() => {
+    const loadApiData = async () => {
+      setIsProcessing(true);
+      try {
+        const result = await processApiAndExcel({ onStatusChange: setLoadingStatus });
+        setOriginalData(result);
+      } catch (err) {
+        console.error('Erro ao carregar dados via API:', err);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    loadApiData();
+  }, []);
 
   const handleExportPDF = async () => {
     try {
@@ -37,6 +56,30 @@ export default function Index() {
         description: error instanceof Error ? error.message : "Tente novamente",
         variant: "destructive"
       });
+    }
+  };
+
+  // Estado e handler para upload específico de Sheet5 (visitas)
+  const [isUploadingVisits, setIsUploadingVisits] = useState(false);
+
+  const handleVisitsUpload = async (file: File) => {
+    setIsUploadingVisits(true);
+    setError(null);
+    try {
+    // Re-processa as APIs junto com o arquivo de visitas (sheet5)
+    const result = await processApiAndExcel(undefined, file);
+      setOriginalData(result);
+      toast({
+        title: 'Visitas importadas com sucesso',
+        description: `Visitas: ${result.totalStoreVisits ?? 0}`
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao importar visitas';
+      console.error('❌ Erro no upload de visitas:', errorMessage);
+      setError(errorMessage);
+      toast({ title: 'Erro ao importar visitas', description: errorMessage, variant: 'destructive' });
+    } finally {
+      setIsUploadingVisits(false);
     }
   };
 
@@ -119,25 +162,35 @@ export default function Index() {
             </p>
           </div>
           
-          {/* Período e Export PDF no header */}
-          {data?.period.start && data?.period.end && (
-            <div className="absolute top-4 right-4 space-y-2">
-              <div className="bg-background border border-border rounded-lg px-3 py-2 shadow-md">
-                <p className="text-xs text-muted-foreground font-medium whitespace-nowrap">
-                  Período: {data.period.start.toLocaleDateString('pt-BR')} a {data.period.end.toLocaleDateString('pt-BR')}
-                </p>
+          {/* Período e Export PDF no header (com botão Importar Visitas acima) */}
+          <div className="absolute top-4 right-4 space-y-2">
+            {originalData && (
+              <UploadZone
+                onFileUpload={handleVisitsUpload}
+                isProcessing={isUploadingVisits}
+                label="Importar Visitas (Excel)"
+              />
+            )}
+
+            {data?.period.start && data?.period.end && (
+              <div>
+                <div className="bg-background border border-border rounded-lg px-3 py-2 shadow-md mb-2">
+                  <p className="text-xs text-muted-foreground font-medium whitespace-nowrap">
+                    Período: {data.period.start.toLocaleDateString('pt-BR')} a {data.period.end.toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+                <Button
+                  onClick={handleExportPDF}
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2 bg-background border-border shadow-md hover:bg-accent"
+                >
+                  <Download className="w-4 h-4" />
+                  Exportar PDF
+                </Button>
               </div>
-              <Button
-                onClick={handleExportPDF}
-                variant="outline"
-                size="sm"
-                className="w-full gap-2 bg-background border-border shadow-md hover:bg-accent"
-              >
-                <Download className="w-4 h-4" />
-                Exportar PDF
-              </Button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </header>
 
@@ -150,6 +203,16 @@ export default function Index() {
       )}
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="space-y-8">
+          {loadingStatus === "carregando" && (
+            <div className="text-sm text-muted-foreground text-center py-2">
+              ⏳ Carregando dados completos do ano...
+            </div>
+          )}
+          {loadingStatus === "completo" && (
+            <div className="text-sm text-green-600 text-center py-2">
+              ✓ Dados completos do ano carregados
+            </div>
+          )}
           {/* Filtros */}
           {originalData && !error && (
             <FilterBar

@@ -183,25 +183,26 @@ function filterSheetData(data: any[], filters: FilterOptions, sheet1Data?: any[]
     // Filtro de dealer
     if (filters.selectedDealers.length > 0) {
       let dealer: any = getValue(rowToCheck, ['Dealer', 'dealer', 'Concessionaria', 'concessionaria', 'Concessionária', 'concessionária']);
-      if (!dealer) {
-        const keys = Object.keys(rowToCheck);
-        if (sheetName === 'Sheet2' && keys[3]) dealer = rowToCheck[keys[3]]; // Coluna D
-        if (sheetName === 'Sheet4' && keys[5]) dealer = rowToCheck[keys[5]]; // Coluna F
-        if (sheetName === 'Sheet5' && keys[0]) dealer = rowToCheck[keys[0]]; // Coluna A
-      }
+      // Removido fallback incorreto por índice — agora só aceita dealer explícito ou correlacionado via Sheet1
       
-      const dealerStr = dealer !== undefined && dealer !== null ? String(dealer).trim() : '';
-      if (!dealerStr) {
-        console.log(`🚫 ${sheetName} - Linha rejeitada: nenhum dealer encontrado`);
+      const dealerStr = dealer ? String(dealer).trim() : '';
+
+      // DESCARTAR valores inválidos (telefones, e-mails, números longos, strings curtas)
+      if (
+        dealerStr === '' ||
+        dealerStr.includes('@') ||               // evita e-mail
+        /\d{3,}/.test(dealerStr) ||              // evita telefones/CPFs
+        dealerStr.length < 3                     // evita valores curtos
+      ) {
+        console.log(`🚫 ${sheetName} - Dealer inválido descartado: ${dealerStr}`);
         return false;
       }
-      
-      // Normalizar o dealer da linha e comparar com dealers selecionados normalizados
+
       const normalizedRowDealer = normalizeDealerName(dealerStr);
       const normalizedSelectedDealers = filters.selectedDealers.map(d => normalizeDealerName(d));
-      
+
       if (!normalizedSelectedDealers.includes(normalizedRowDealer)) {
-        console.log(`🚫 ${sheetName} - Linha rejeitada por dealer: "${dealerStr}" (normalizado: "${normalizedRowDealer}") não está em ${filters.selectedDealers.map(d => `"${d}" (normalizado: "${normalizeDealerName(d)}")`)}`);
+        console.log(`🚫 ${sheetName} - Dealer rejeitado após normalização: ${dealerStr}`);
         return false;
       }
     }

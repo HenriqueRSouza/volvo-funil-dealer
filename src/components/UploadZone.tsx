@@ -6,9 +6,10 @@ import { useToast } from '@/hooks/use-toast';
 interface UploadZoneProps {
   onFileUpload: (file: File) => void;
   isProcessing?: boolean;
+  label?: string;
 }
 
-export default function UploadZone({ onFileUpload, isProcessing = false }: UploadZoneProps) {
+export default function UploadZone({ onFileUpload, isProcessing = false, label }: UploadZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const { toast } = useToast();
 
@@ -22,7 +23,7 @@ export default function UploadZone({ onFileUpload, isProcessing = false }: Uploa
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "Arquivo muito grande",
         description: "O arquivo deve ter no máximo 10MB.",
@@ -63,7 +64,9 @@ export default function UploadZone({ onFileUpload, isProcessing = false }: Uploa
         ) : (
           <Upload className="w-4 h-4 mr-2" />
         )}
-        {isProcessing ? 'Processando...' : 'Selecionar arquivo'}
+
+        {isProcessing ? 'Processando...' : (label || 'Selecionar arquivo')}
+
         <input
           type="file"
           accept=".xlsx"
