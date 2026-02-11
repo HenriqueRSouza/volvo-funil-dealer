@@ -1,101 +1,140 @@
-# Welcome to your Lovable project
+# volvo-funil-dealer
 
-## Project info
+Aplicação frontend em React + TypeScript para tratamento e visualização do funil de vendas da rede Volvo.
 
-**URL**: https://lovable.dev/projects/3beb4d3c-92b4-4dd0-97f9-a7a72e52d753
-
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/3beb4d3c-92b4-4dd0-97f9-a7a72e52d753) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
+## Tecnologias
 - Vite
-- TypeScript
 - React
-- shadcn-ui
+- TypeScript
 - Tailwind CSS
+- shadcn-ui
+- Autenticação: Entra ID (Azure AD) via Azure Static Web Apps
 
-## Configuração do Ambiente
+## Pré-requisitos
+- Node.js (recomendado via nvm)
+- npm ou yarn
+- Conta/serviço para hospedar APIs que a UI consome (Logic Apps / Azure Functions / APIs REST)
 
-### Variáveis de Ambiente
-
-Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
+## Variáveis de ambiente
+Crie um arquivo `.env` na raiz do projeto com as variáveis abaixo (no Vite todas as variáveis públicas devem começar com `VITE_`):
 
 ```env
-# URLs das APIs do Logic App
-# IMPORTANTE: No Vite, todas as variáveis devem ter o prefixo VITE_ para serem acessíveis no frontend
-
-VITE_SHEET1_URL=https://your-logic-app-url-1.azurewebsites.net/api/sheet1
-VITE_SHEET2_URL=https://your-logic-app-url-2.azurewebsites.net/api/sheet2
-VITE_SHEET3_URL=https://your-logic-app-url-3.azurewebsites.net/api/sheet3
-VITE_SHEET4_URL=https://your-logic-app-url-4.azurewebsites.net/api/sheet4
+VITE_SHEET1_URL=https://seu-logic-app-ou-api/api/sheet1
+VITE_SHEET2_URL=https://seu-logic-app-ou-api/api/sheet2
+VITE_SHEET3_URL=https://seu-logic-app-ou-api/api/sheet3
+VITE_SHEET4_URL=https://seu-logic-app-ou-api/api/sheet4
 ```
 
-Substitua as URLs acima pelas URLs reais das suas APIs do Logic App.
+Substitua as URLs pelas endpoints reais das suas APIs.
 
-### Autenticação
+## Autenticação
+A aplicação integra-se à autenticação do Azure Static Web Apps com Entra ID (Azure AD). Endpoints úteis:
+- Login: `/.auth/login/aad`
+- Logout: `/.auth/logout`
+- Verificar usuário: `/.auth/me`
 
-A aplicação utiliza autenticação com Entra ID (Azure AD) através do Azure Static Web Apps. 
+As roles e informações do usuário são retornadas pela API de roles do Azure Static Web Apps.
 
-- **Login**: `/.auth/login/aad`
-- **Logout**: `/.auth/logout`
-- **Verificação de usuário**: `/.auth/me`
+## Instalação e execução local
+1. Clonar o repositório:
+   git clone <REPO_URL>
+2. Entrar no diretório:
+   cd volvo-funil-dealer
+3. Instalar dependências:
+   npm install
+4. Rodar em modo de desenvolvimento:
+   npm run dev
 
-A autenticação é gerenciada automaticamente pelo Azure Static Web Apps. Os usuários precisam fazer login para acessar a aplicação, e as roles são retornadas pela API de roles do Azure Static Web Apps.
+Build de produção:
+- Gerar build: `npm run build`
+- Pré-visualizar build: `npm run preview`
 
-## How can I deploy this project?
+(obs.: adapte para `yarn` se preferir)
 
-Simply open [Lovable](https://lovable.dev/projects/3beb4d3c-92b4-4dd0-97f9-a7a72e52d753) and click on Share -> Publish.
+## Estrutura do projeto (resumo)
+- src/ — código fonte React/TS
+- public/ — assets públicos
+- index.html — entrada do Vite
+- vite.config.ts — configuração do Vite
+- tailwind.config.cjs — configuração do Tailwind
+- package.json — scripts e dependências
 
-## Can I connect a custom domain to my Lovable project?
+## Scripts comuns
+- npm run dev — servidor de desenvolvimento
+- npm run build — gera produção
+- npm run preview — serve o build localmente
+- npm run lint — (se configurado) linting
+- npm run test — (se configurado) executar testes
 
-Yes, you can!
+Verifique `package.json` para scripts específicos do projeto.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Deploy
+Recomendado usar Azure Static Web Apps (compatível com autenticação Entra ID) ou qualquer host estático que sirva o build gerado por Vite.
+- Criar workflow de CI que execute `npm ci` e `npm run build` e publique a pasta `dist`.
+- Configurar as variáveis de ambiente no provedor de hospedagem/CI.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Integração com APIs
+- Garanta que as APIs permitam CORS para a origem do frontend.
+- Use as variáveis `VITE_SHEET*_URL` para apontar para as endpoints reais.
+
+## Fluxos de Dados
+
+Segue uma visão dos principais fluxos de dados: de onde vêm os dados, como são processados e para onde vão.
+
+### Visão geral
+
+```mermaid
+flowchart LR
+   subgraph Sources
+      CRM[Dealer CRM / DMS]
+      Forms[Lead forms / Landing pages]
+      Integrations[3rd-party APIs]
+   end
+   LogicApp[Logic App / Azure Function]
+   Storage[(Storage / Database / Google Sheets)]
+   Frontend[Frontend (React)]
+   Analytics[Analytics / Power BI]
+   Notification[Email / Teams notifications]
+
+   CRM --> LogicApp
+   Forms --> LogicApp
+   Integrations --> LogicApp
+   LogicApp --> Storage
+   LogicApp --> Frontend
+   Frontend --> Analytics
+   LogicApp --> Notification
+```
+
+### Fluxos por endpoint (variáveis `VITE_SHEETn_URL`)
+
+- `VITE_SHEET1_URL`: Origem: Dealer CRM / formulários; Processamento: Logic App transforma e normaliza; Destino: Planilha/Storage (Sheet1) e consumidor: frontend consulta para exibir dashboard.
+- `VITE_SHEET2_URL`: Origem: Lead aggregator / campanhas; Processamento: enrichment e dedup; Destino: Storage (Sheet2) e serviços analíticos; Consumidor: frontend e relatórios.
+- `VITE_SHEET3_URL`: Origem: Pós-venda / histórico de atendimento; Processamento: agregação por concessionária; Destino: Storage (Sheet3) e BI; Consumidor: frontend.
+- `VITE_SHEET4_URL`: Origem: Conversões / vendas confirmadas; Processamento: validação e sincronização com ERP; Destino: Storage (Sheet4) e notificações para equipes.
+
+### Observações operacionais
+- As Logic Apps/Functions expõem as URLs consumidas pelo frontend via variáveis `VITE_SHEET*_URL`.
+- O frontend realiza apenas leitura para exibir o funil; operações de escrita (se houver) devem passar por APIs autenticadas.
+- Garantir logs e monitoramento nas Logic Apps para rastrear origem/destino de registros e erros.
+
+## Segurança
+- Nunca comitar segredos ou chaves no repositório.
+- Variáveis sensíveis devem ser definidas no ambiente do host/CI.
+- Revisar permissões do app Entra ID e roles.
+
+## Testes e QA
+- Adicionar testes unitários com Jest/Testing Library conforme necessidade.
+- Automatizar checks via CI (lint, build e testes).
+
+## Contribuição
+- Criar branches nomeadas por feature/bugfix.
+- Abrir PR com descrição clara e checklist de testes.
+- Seguir convenções de commit do time.
+
+## Resolução de problemas
+- Erro CORS ao consumir API: confirmar origem e cabeçalhos no backend.
+- Variáveis Vite não carregam: confirmar prefixo `VITE_` e reiniciar dev server.
+- Problemas de autenticação: verificar configuração do Azure Static Web Apps e redirect URIs.
+
+## Licença
+Adicionar o arquivo LICENSE conforme política do repositório (por exemplo MIT).
