@@ -184,23 +184,26 @@ function filterSheetData(data: any[], filters: FilterOptions, sheet1Data?: any[]
       
       const dealerStr = dealer ? String(dealer).trim() : '';
 
-      // DESCARTAR valores inválidos (telefones, e-mails, números longos, strings curtas)
-      if (
-        dealerStr === '' ||
-        dealerStr.includes('@') ||               // evita e-mail
-        /\d{3,}/.test(dealerStr) ||              // evita telefones/CPFs
-        dealerStr.length < 3                     // evita valores curtos
-      ) {
-        console.log(`🚫 ${sheetName} - Dealer inválido descartado: ${dealerStr}`);
-        return false;
-      }
+      // ✅ Se não há dealer identificado, NÃO descartar a linha
+      // (selecionar todas nunca pode ser mais restritivo que não filtrar)
+      if (dealerStr !== '') {
+        // DESCARTAR apenas valores claramente inválidos
+        if (
+          dealerStr.includes('@') ||               // evita e-mail
+          /\d{3,}/.test(dealerStr) ||              // evita telefones/CPFs
+          dealerStr.length < 3                     // evita valores curtos
+        ) {
+          console.log(`🚫 ${sheetName} - Dealer inválido descartado: ${dealerStr}`);
+          return false;
+        }
 
-      const normalizedRowDealer = normalizeDealerName(dealerStr);
-      const normalizedSelectedDealers = filters.selectedDealers.map(d => normalizeDealerName(d));
+        const normalizedRowDealer = normalizeDealerName(dealerStr);
+        const normalizedSelectedDealers = filters.selectedDealers.map(d => normalizeDealerName(d));
 
-      if (!normalizedSelectedDealers.includes(normalizedRowDealer)) {
-        console.log(`🚫 ${sheetName} - Dealer rejeitado após normalização: ${dealerStr}`);
-        return false;
+        if (!normalizedSelectedDealers.includes(normalizedRowDealer)) {
+          console.log(`🚫 ${sheetName} - Dealer rejeitado após normalização: ${dealerStr}`);
+          return false;
+        }
       }
     }
 
