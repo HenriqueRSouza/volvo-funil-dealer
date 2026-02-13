@@ -179,7 +179,15 @@ function filterSheetData(data: any[], filters: FilterOptions, sheet1Data?: any[]
       const normalizedRowDealer = normalizeDealerName(String(dealer));
       const normalizedSelectedDealers = filters.selectedDealers.map(d => normalizeDealerName(d));
 
+      if (sheetName === 'Sheet7') {
+        console.log(`🔍 Sheet7 - Dealer na linha: "${dealer}" -> "${normalizedRowDealer}"`);
+        console.log(`🔍 Sheet7 - Dealers selecionados:`, normalizedSelectedDealers);
+      }
+
       if (!normalizedSelectedDealers.includes(normalizedRowDealer)) {
+        if (sheetName === 'Sheet7') {
+          console.log(`🚫 Sheet7 - Linha rejeitada: dealer "${normalizedRowDealer}" não está na lista selecionada`);
+        }
         return false;
       }
     }
@@ -429,15 +437,19 @@ function calculateFilteredMetrics(
   let osatCarHandover = 0;
   let osatTestDrive = 0;
   if (filteredSheet7 && filteredSheet7.length > 0) {
+    console.log(`📊 Calculando OSAT com ${filteredSheet7.length} linhas filtradas de Sheet7`);
+    
     let totalWeightedCarHandover = 0;
     let totalResponsesCarHandover = 0;
     let totalWeightedTestDrive = 0;
     let totalResponsesTestDrive = 0;
     
-    filteredSheet7.forEach(row => {
+    filteredSheet7.forEach((row, index) => {
       const surveyEvent = getValue(row, ['SURVEY_EVENT_NAME', 'survey_event_name']);
       const satisfaction = getValue(row, ['media_overall_satisfaction', 'mediaOverallSatisfaction']);
       const qtdRespostas = getValue(row, ['qtd_respostas', 'qtdRespostas']);
+      
+      console.log(`📊 Sheet7 linha ${index}: event="${surveyEvent}", satisfaction=${satisfaction}, qtd=${qtdRespostas}`);
       
       if (satisfaction !== null && satisfaction !== undefined && !isNaN(Number(satisfaction)) &&
           qtdRespostas !== null && qtdRespostas !== undefined && !isNaN(Number(qtdRespostas))) {
@@ -456,6 +468,10 @@ function calculateFilteredMetrics(
     
     osatCarHandover = totalResponsesCarHandover > 0 ? totalWeightedCarHandover / totalResponsesCarHandover : 0;
     osatTestDrive = totalResponsesTestDrive > 0 ? totalWeightedTestDrive / totalResponsesTestDrive : 0;
+    
+    console.log(`📊 OSAT calculado: Car Handover = ${osatCarHandover}, Test Drive = ${osatTestDrive}`);
+  } else {
+    console.log(`📊 Sheet7 vazia ou não filtrada`);
   }
 
   return {
